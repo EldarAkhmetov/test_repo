@@ -1,0 +1,45 @@
+name: Complex Multi-Stage Workflow
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # БЛОК 1: Начало (Подготовка)
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Инициализация проекта..."
+
+  # БЛОК 2: Параллельное тестирование (зависят от setup)
+  lint:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - run: echo "Проверка линтером..."
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - run: echo "Запуск юнит-тестов..."
+
+  # БЛОК 3: Сборка (ждет окончания ВСЕХ тестов из Блока 2)
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests] # Ждет обе джобы
+    steps:
+      - run: echo "Сборка Docker-образа..."
+
+  # БЛОК 4: Параллельный деплой на разные окружения (зависят от build)
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - run: echo "Деплой на Staging..."
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - run: echo "Деплой на Production..."
