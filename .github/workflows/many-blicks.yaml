@@ -1,0 +1,86 @@
+name: Проверка сложного графа (10 блоков)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Позволяет запускать вручную из интерфейса
+
+jobs:
+  # Блок 1: Начало
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Init
+        run: echo "Начало сборки"
+
+  # Блок 2: Линтинг и статический анализ (зависит от init)
+  lint:
+    needs: init
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Lint
+        run: echo "Проверка кода"
+
+  # Блок 3: Тестирование (зависит от lint)
+  tests:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Tests
+        run: echo "Запуск тестов"
+
+  # Блок 4: Сборка артефактов (зависит от tests)
+  build:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build app
+        run: echo "Сборка приложения"
+
+  # Блок 5 и Блок 6: Параллельное разветвление (оба зависят от build)
+  # Они встанут параллельно, создавая разветвление графа
+  security-scan:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Security Check
+        run: echo "Сканирование уязвимостей"
+
+  sonar-analysis:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sonar Qube
+        run: echo "Анализ качества кода"
+
+  # Блок 7: Слияние веток графа (зависит от ОБОИХ предыдущих шагов)
+  pre-deploy:
+    needs: [security-scan, sonar-analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare deploy
+        run: echo "Подготовка к деплою"
+
+  # Блок 8: Деплой на Staging (зависит от pre-deploy)
+  deploy-staging:
+    needs: pre-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Staging
+        run: echo "Деплой выполнен"
+
+  # Блок 9: Интеграционные тесты (зависит от deploy-staging)
+  e2e-tests:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run E2E
+        run: echo "Проверка после деплоя"
+
+  # Блок 10: Финальное уведомление
+  notify:
+    needs: e2e-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Notification
+        run: echo "Воркфлоу успешно завершен!"
