@@ -208,12 +208,14 @@ jobs:
           echo "Ждём ${SLOW_SECONDS}с: задача в running, зависимые — в waiting"
           sleep "${SLOW_SECONDS}"
 
+  release-notes:
+    needs: [smoke, format]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Заметки о релизе
+        run: |
+          echo "release-notes"
+          sleep 2
 
 
 
-
-
-
-
-
-  
