@@ -1,0 +1,56 @@
+# Пробный workflow для проверки, как GitHub группирует задачи в графе запуска.
+# Скопировать в .github/workflows/ тестового репозитория.
+#
+# Вопросы, на которые отвечает файл:
+# 1. Две задачи без needs  → один блок с двумя строками или два блока?
+# 2. Две задачи с одинаковым непустым needs → один блок или два?
+# 3. Matrix-задача (3 значения) → один блок с бейджем или три блока?
+# 4. Задача, у которой needs — надмножество → отдельный блок?
+
+name: "Probe: grouping in run graph"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # --- 1. Параллельные задачи без зависимостей (как build/build2) ---
+  alpha-without-needs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo alpha
+
+  beta-without-needs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo beta
+
+  # --- 2. Две задачи с идентичным набором непустых зависимостей ---
+  gamma-needs-both:
+    needs: [alpha-without-needs, beta-without-needs]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo gamma
+
+  delta-needs-both:
+    needs: [alpha-without-needs, beta-without-needs]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo delta
+
+  # --- 3. Matrix-задача на три значения ---
+  epsilon-matrix:
+    needs: alpha-without-needs
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [one, two, three]
+    steps:
+      - run: echo "epsilon ${{ matrix.variant }}"
+
+  # --- 4. Задача с надмножеством зависимостей ---
+  zeta-needs-one-extra:
+    needs: [alpha-without-needs, beta-without-needs, epsilon-matrix]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo zeta
