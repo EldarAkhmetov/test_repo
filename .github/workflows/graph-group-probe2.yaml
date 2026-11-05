@@ -1,0 +1,84 @@
+# Второй пробный workflow: уточняет правило группировки задач в графе GitHub.
+# Скопировать в .github/workflows/ тестового репозитория и запустить.
+#
+# Что проверяем (четыре независимых «острова» в одном запуске):
+# А. Два листа без needs (аналог build/build2 из test1.yml) — один блок?
+# Б. Две задачи без needs, у которых общий потомок (аналог alpha/beta) — один блок?
+# В. Две задачи с одинаковым непустым needs, у которых общий потомок — один блок?
+# Г. Две задачи с одинаковым непустым needs, обе листья (как gamma/delta) — один блок?
+
+name: "Probe 2: grouping in run graph"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  # --- А. Два листа без зависимостей ---
+  island-a-first:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo a1
+
+  island-a-second:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo a2
+
+  # --- Б. Две задачи без needs с общим потомком ---
+  island-b-first:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo b1
+
+  island-b-second:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo b2
+
+  island-b-join:
+    needs: [island-b-first, island-b-second]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo b3
+
+  # --- В. Одинаковый непустой needs + общий потомок ---
+  island-v-root:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo v0
+
+  island-v-first:
+    needs: island-v-root
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo v1
+
+  island-v-second:
+    needs: island-v-root
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo v2
+
+  island-v-join:
+    needs: [island-v-first, island-v-second]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo v3
+
+  # --- Г. Одинаковый непустой needs, обе листья ---
+  island-g-root:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo g0
+
+  island-g-first:
+    needs: island-g-root
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo g1
+
+  island-g-second:
+    needs: island-g-root
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo g2
