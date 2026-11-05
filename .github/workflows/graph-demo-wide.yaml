@@ -217,5 +217,57 @@ jobs:
           echo "release-notes"
           sleep 2
 
+  changelog:
+    needs: perf
+    runs-on: ubuntu-latest
+    steps:
+      - name: Обновление changelog
+        run: |
+          echo "changelog"
+          sleep 2
+
+  artifacts:
+    needs: [smoke, perf]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Публикация артефактов
+        run: |
+          echo "artifacts"
+          sleep 3
+
+  deploy-staging:
+    needs: artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Деплой на стейдж
+        run: |
+          echo "deploy-staging"
+          sleep 3
+
+  deploy-preview:
+    needs: [artifacts, db-migrate, audit]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Деплой превью
+        run: |
+          echo "deploy-preview"
+          sleep 3
+
+  deploy-prod:
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Деплой в прод
+        run: |
+          echo "deploy-prod"
+          sleep 3
+
+  notify:
+    needs: [deploy-prod, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Уведомление
+        run: echo "Готово"
+
 
 
