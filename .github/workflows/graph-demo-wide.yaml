@@ -1,0 +1,83 @@
+name: Демо графа широкий запуск
+
+# Проверка раскладки на объёмном DAG: 10 колонок по горизонтали,
+# до пяти задач в колонке по вертикали и ветки через несколько колонок
+# (security-scan → notify, a11y → deploy-prod, audit → deploy-preview,
+# format → release-notes).
+
+on:
+  workflow_dispatch:
+    inputs:
+      fail_job:
+        description: "Уронить задачу a11y (красный статус, rerun и skipped)"
+        type: boolean
+        default: false
+      slow_seconds:
+        description: "Длительность задачи perf, сек (проверка running/waiting)"
+        type: string
+        default: "15"
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Подготовка
+        run: |
+          echo "Инициализация окружения"
+          sleep 2
+
+  lint:
+    needs: init
+    runs-on: ubuntu-latest
+    steps:
+      - name: Линтинг
+        run: |
+          echo "Линтинг кода"
+          sleep 3
+
+  types:
+    needs: init
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка типов
+        run: |
+          echo "Проверка типов"
+          sleep 3
+
+  audit:
+    needs: init
+    runs-on: ubuntu-latest
+    steps:
+      - name: Аудит зависимостей
+        run: |
+          echo "Аудит зависимостей"
+          sleep 2
+
+  format:
+    needs: init
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка форматирования
+        run: |
+          echo "Проверка форматирования"
+          sleep 2
+
+  security-scan:
+    needs: init
+    runs-on: ubuntu-latest
+    steps:
+      - name: Сканирование безопасности
+        run: |
+          echo "Сканирование безопасности"
+          sleep 4
+
+  unit-core:
+    needs: [lint, types]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тесты ядра
+        run: |
+          echo "unit-core"
+          sleep 4
+
+  
