@@ -80,4 +80,140 @@ jobs:
           echo "unit-core"
           sleep 4
 
+  unit-ui:
+    needs: [lint, types]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тесты интерфейса
+        run: |
+          echo "unit-ui"
+          sleep 4
+
+  unit-api:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тесты API
+        run: |
+          echo "unit-api"
+          sleep 3
+
+  unit-cli:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тесты CLI
+        run: |
+          echo "unit-cli"
+          sleep 3
+
+  unit-store:
+    needs: types
+    runs-on: ubuntu-latest
+    steps:
+      - name: Тесты стейта
+        run: |
+          echo "unit-store"
+          sleep 3
+
+  build-app:
+    needs: [unit-core, unit-ui]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Сборка приложения
+        run: |
+          echo "build-app"
+          sleep 5
+
+  build-docs:
+    needs: unit-cli
+    runs-on: ubuntu-latest
+    steps:
+      - name: Сборка документации
+        run: |
+          echo "build-docs"
+          sleep 3
+
+  build-storybook:
+    needs: [unit-ui, unit-store]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Сборка сторибука
+        run: |
+          echo "build-storybook"
+          sleep 3
+
+  e2e-chrome:
+    needs: build-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: E2E в Chrome
+        run: |
+          echo "e2e-chrome"
+          sleep 5
+
+  e2e-firefox:
+    needs: build-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: E2E в Firefox
+        run: |
+          echo "e2e-firefox"
+          sleep 5
+
+  e2e-safari:
+    needs: build-storybook
+    runs-on: ubuntu-latest
+    steps:
+      - name: E2E в Safari
+        run: |
+          echo "e2e-safari"
+          sleep 4
+
+  contract:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Контрактные тесты
+        run: |
+          echo "contract"
+          sleep 3
+
+  db-migrate:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка миграций
+        run: |
+          echo "db-migrate"
+          sleep 3
+
+  smoke:
+    needs: [e2e-chrome, e2e-firefox]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Дымовые тесты
+        run: |
+          echo "smoke"
+          sleep 3
+
+  perf:
+    needs: [e2e-firefox, contract]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Нагрузочные тесты
+        env:
+          SLOW_SECONDS: ${{ inputs.slow_seconds }}
+        run: |
+          echo "Ждём ${SLOW_SECONDS}с: задача в running, зависимые — в waiting"
+          sleep "${SLOW_SECONDS}"
+
+
+
+
+
+
+
+
+
   
